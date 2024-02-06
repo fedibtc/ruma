@@ -5,6 +5,7 @@ use std::{fmt, ops::Deref, str::FromStr};
 use ruma_macros::{
     AsRefStr, AsStrAsRefStr, DebugAsRefStr, DisplayAsRefStr, OrdAsRefStr, PartialOrdAsRefStr,
 };
+use serde::Serialize;
 
 use super::{
     is_tchar, is_token, quote_ascii_string_if_required, rfc8187, sanitize_for_ascii_quoted_string,
@@ -26,7 +27,7 @@ use super::{
 /// [RFC 6266]: https://datatracker.ietf.org/doc/html/rfc6266
 /// [RFC 8187]: https://datatracker.ietf.org/doc/html/rfc8187
 /// [RFC 7578]: https://datatracker.ietf.org/doc/html/rfc7578
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize)]
 #[cfg_attr(not(feature = "unstable-exhaustive-types"), non_exhaustive)]
 pub struct ContentDisposition {
     /// The disposition type.
@@ -364,6 +365,15 @@ pub enum ContentDispositionType {
 
     #[doc(hidden)]
     _Custom(TokenString),
+}
+
+impl Serialize for ContentDispositionType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.as_str().serialize(serializer)
+    }
 }
 
 impl ContentDispositionType {
